@@ -2,6 +2,10 @@ import re
 
 
 def normalize(raw_input, payload_type):
+   if payload_type == "wifi":
+    if not isinstance(raw_input, dict):
+        raise TypeError("WiFi payload must be a dictionary")
+else:
     if not isinstance(raw_input, str):
         raise TypeError("Input must be a string")
 
