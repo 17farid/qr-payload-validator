@@ -60,3 +60,44 @@ else:
 
     else:
         raise ValueError("Unsupported payload type")
+
+def normalize(raw_input, payload_type):
+
+    # text
+    if payload_type == "text":
+        ...
+
+    # url
+    elif payload_type == "url":
+        ...
+
+    # email
+    elif payload_type == "email":
+        ...
+
+    # phone
+    elif payload_type == "phone":
+        ...
+
+    # wifi
+    elif payload_type == "wifi":
+        if not isinstance(raw_input, dict):
+            raise TypeError("WiFi payload must be a dictionary")
+
+        ssid = raw_input.get("ssid")
+        password = raw_input.get("password", "")
+        encryption = raw_input.get("encryption", "WPA")
+
+        if not ssid:
+            raise ValueError("SSID is required")
+
+        if encryption not in ("WPA", "WEP", "nopass"):
+            raise ValueError("Unsupported WiFi encryption")
+
+        if encryption == "nopass":
+            password = ""
+
+        return f"WIFI:T:{encryption};S:{ssid};P:{password};;"
+
+    else:
+        raise ValueError("Unsupported payload type")
