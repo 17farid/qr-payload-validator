@@ -2,17 +2,43 @@ import re
 
 
 def normalize(raw_input, payload_type):
-   if payload_type == "wifi":
-    if not isinstance(raw_input, dict):
-        raise TypeError("WiFi payload must be a dictionary")
-else:
+    """
+    Normalize different payload types into QR-ready strings.
+
+    Supported types:
+    - text
+    - url
+    - email
+    - phone
+    - wifi
+    """
+
+    if payload_type == "wifi":
+        if not isinstance(raw_input, dict):
+            raise TypeError("WiFi input must be a dictionary.")
+
+        ssid = raw_input.get("ssid")
+        password = raw_input.get("password", "")
+        encryption = raw_input.get("encryption", "WPA")
+
+        if not ssid:
+            raise ValueError("SSID is required.")
+
+        if encryption not in ("WPA", "WEP", "nopass"):
+            raise ValueError("Invalid encryption type.")
+
+        if encryption == "nopass":
+            password = ""
+
+        return f"WIFI:T:{encryption};S:{ssid};P:{password};;"
+
     if not isinstance(raw_input, str):
-        raise TypeError("Input must be a string")
+        raise TypeError("Input must be a string.")
 
     raw_input = raw_input.strip()
 
-    if not raw_input:
-        raise ValueError("Input cannot be empty")
+    if raw_input == "":
+        raise ValueError("Input cannot be empty.")
 
     payload_type = payload_type.lower()
 
@@ -20,84 +46,39 @@ else:
         return raw_input
 
     elif payload_type == "url":
+
         if not raw_input.startswith(("http://", "https://")):
             raw_input = "https://" + raw_input
 
-        url_pattern = re.compile(
+        pattern = re.compile(
             r"^https?://([A-Za-z0-9-]+\.)+[A-Za-z]{2,}(/.*)?$"
         )
 
-        if not url_pattern.match(raw_input):
-            raise ValueError("Invalid URL")
+        if not pattern.match(raw_input):
+            raise ValueError("Invalid URL.")
 
         return raw_input
 
     elif payload_type == "email":
+
         if raw_input.startswith("mailto:"):
-            email = raw_input[7:]
-        else:
             email = raw_input
+        else:
+            email = "mailto:" + raw_input
 
-        email_pattern = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+        if not re.match(r"^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+            raise ValueError("Invalid email.")
 
-        if not email_pattern.match(email):
-            raise ValueError("Invalid email")
-
-        return "mailto:" + email
+        return email
 
     elif payload_type == "phone":
+
         phone = raw_input.replace(" ", "")
 
         if not re.fullmatch(r"\+?\d+", phone):
-            raise ValueError("Invalid phone number")
+            raise ValueError("Invalid phone number.")
 
         return "tel:" + phone
 
-    elif payload_type == "wifi":
-        raise NotImplementedError(
-            "WiFi payload expects a dictionary/object, not a string."
-        )
-
     else:
-        raise ValueError("Unsupported payload type")
-
-def normalize(raw_input, payload_type):
-
-    # text
-    if payload_type == "text":
-        ...
-
-    # url
-    elif payload_type == "url":
-        ...
-
-    # email
-    elif payload_type == "email":
-        ...
-
-    # phone
-    elif payload_type == "phone":
-        ...
-
-    # wifi
-    elif payload_type == "wifi":
-        if not isinstance(raw_input, dict):
-            raise TypeError("WiFi payload must be a dictionary")
-
-        ssid = raw_input.get("ssid")
-        password = raw_input.get("password", "")
-        encryption = raw_input.get("encryption", "WPA")
-
-        if not ssid:
-            raise ValueError("SSID is required")
-
-        if encryption not in ("WPA", "WEP", "nopass"):
-            raise ValueError("Unsupported WiFi encryption")
-
-        if encryption == "nopass":
-            password = ""
-
-        return f"WIFI:T:{encryption};S:{ssid};P:{password};;"
-
-    else:
-        raise ValueError("Unsupported payload type")
+        raise ValueError("Unsupported payload type.")
