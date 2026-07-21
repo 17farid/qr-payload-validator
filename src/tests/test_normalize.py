@@ -54,3 +54,26 @@ class TestNormalize(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+def test_wifi(self):
+    wifi = {
+        "ssid": "Home",
+        "password": "12345678",
+        "encryption": "WPA"
+    }
+
+    self.assertEqual(
+        normalize(wifi, "wifi"),
+        "WIFI:T:WPA;S:Home;P:12345678;;"
+    )
+
+
+def test_wifi_missing_ssid(self):
+    with self.assertRaises(ValueError):
+        normalize(
+            {
+                "password": "12345678",
+                "encryption": "WPA"
+            },
+            "wifi"
+        )
